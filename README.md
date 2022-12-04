@@ -6,4 +6,4 @@
 ~모델은 competition이 끝난 후 공개할 예정~
 코랩에서 작업을 용이하게 하기위해 초기 모델은 push
 
-초기모델 구성: 22.12.05.(월) [PR3]()
+초기모델 구성: 22.12.05.(월) [PR3](https://github.com/long-practice/OTTO-Multi-Objective-Recsys/pull/3)
