@@ -53,8 +53,7 @@ class Recommender(pl.LightningModule):
         pos_encoder = (torch.arange(0, in_sequence_len, device=src_items.device).unsqueeze(0).repeat(batch_size, 1))
         pos_encoder = self.input_pos_embedding(pos_encoder)
 
-        type_encoder = (torch.arange(0, in_sequence_len, device=_type.device).unsqueeze(0).repeat(batch_size, 1))
-        type_encoder = self.input_type_embedding(type_encoder)
+        type_encoder = self.input_type_embedding(_type)
 
         src_items += pos_encoder
         src_items += type_encoder
