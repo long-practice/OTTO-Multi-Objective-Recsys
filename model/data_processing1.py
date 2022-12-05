@@ -27,7 +27,8 @@ def map_type(df):
 
 def get_context(df, split, context_size=120, val_context_size=5):
     if split == 'train':
-        end_index = random.randint(10, df.shape[0] - val_context_size)
+        m, M = min(10, df.shape[0] - val_context_size), max(10, df.shape[0] - val_context_size)
+        end_index = random.randint(m, M)
     elif split in ['val', 'test']:
         end_index = df.shape[0]
     else:
@@ -55,7 +56,3 @@ def df_to_np(df, expected_size=30):
     arr = np.array(df)
     arr = pad_arr(arr, expected_size=expected_size)
     return arr
-
-
-def genome_mapping(genome):
-    pass
