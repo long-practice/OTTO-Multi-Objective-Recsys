@@ -37,7 +37,7 @@ class Recommender(pl.LightningModule):
 
         self.item_embeddings = torch.nn.Embedding(self.vocab_size, embedding_dim=channels)
         self.input_pos_embedding = torch.nn.Embedding(512, embedding_dim=channels)
-        self.input_type_embedding = torch.nn.Embedding(5, embedding_dim=channels)
+        self.input_type_embedding = torch.nn.Embedding(3, embedding_dim=channels)
 
         encoder_layer = nn.TransformerEncoderLayer(d_model=channels, nhead=4, dropout=self.dropout)
 
@@ -68,14 +68,15 @@ class Recommender(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         total_loss = 0
-        for i in range(3):
-            src_items, y_true, _type = batch[i]
+        # total_src, total_y_true, total_type = batch
+        src_items, y_true = batch
+        for _type in range(3):
             y_pred = self(src_items, _type)
 
             y_pred = y_pred.view(-1, y_pred.size(2))
-            y_true = y_true.view(-1)
+            y_true = y_true.view.contiguous().view(-1)
 
-            src_items = src_items.view(-1)
+            src_items = src_items.contiguous().view(-1)
             mask = src_items == self.mask
 
             loss = masked_ce(y_pred=y_pred, y_true=y_true, mask=mask)
@@ -89,14 +90,15 @@ class Recommender(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         total_loss = 0
-        for i in range(3):
-            src_items, y_true, _type = batch[i]
+        # total_src, total_y_true, total_type = batch
+        src_items, y_true = batch
+        for _type in range(3):
             y_pred = self(src_items, _type)
 
             y_pred = y_pred.view(-1, y_pred.size(2))
-            y_true = y_true.view(-1)
+            y_true = y_true.view.contiguous().view(-1)
 
-            src_items = src_items.view(-1)
+            src_items = src_items.contiguous().view(-1)
             mask = src_items == self.mask
 
             loss = masked_ce(y_pred=y_pred, y_true=y_true, mask=mask)
@@ -110,14 +112,15 @@ class Recommender(pl.LightningModule):
 
     def test_step(self, batch, batch_idx):
         total_loss = 0
-        for i in range(3):
-            src_items, y_true, _type = batch[i]
+        # total_src, total_y_true, total_type = batch
+        src_items, y_true = batch
+        for _type in range(3):
             y_pred = self(src_items, _type)
 
             y_pred = y_pred.view(-1, y_pred.size(2))
-            y_true = y_true.view(-1)
+            y_true = y_true.view.contiguous().view(-1)
 
-            src_items = src_items.view(-1)
+            src_items = src_items.contiguous().view(-1)
             mask = src_items == self.mask
 
             loss = masked_ce(y_pred=y_pred, y_true=y_true, mask=mask)
