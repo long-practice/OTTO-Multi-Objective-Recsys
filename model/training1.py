@@ -1,3 +1,5 @@
+import os
+
 import argparse
 import random
 
@@ -88,7 +90,11 @@ def train(
     train_loader = DataLoader(train_data, batch_size=batch_size, num_workers=10, shuffle=True)
     val_loader = DataLoader(val_data, batch_size=batch_size, num_workers=10, shuffle=False)
 
+    ckpt_path = './recommender_models/recommender.ckpt'
     model = Recommender(vocab_size=len(aid_mapping)+2, lr=1e-4, dropout=0.3)
+    if os.path.isfile(ckpt_path):
+        print('existed ckpt')
+        model = model.load_from_checkpoint(ckpt_path, vocab_size=len(aid_mapping)+2, lr=1e-4, dropout=0.3)
     logger = TensorBoardLogger(save_dir=log_dir)
     checkpoint_callback = ModelCheckpoint(monitor='valid_loss', mode='min', dirpath=model_dir, filename='recommender')
 
