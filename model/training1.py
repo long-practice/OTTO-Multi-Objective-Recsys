@@ -48,11 +48,12 @@ class Dataset(torch.utils.data.Dataset):
         for i in range(len(types)):
             type_dict[types[i]].append(i)
 
-        src_data, trg_data, type_data = [], [], []
+        # src_data, trg_data, type_data = [], [], []
+        src_data, trg_data = [], []
         for t in (2, 3, 4):
             idxs = []
             if self.split == 'train':
-                idxs = np.random.choice(type_dict[t], int(len(type_dict[t]) * 0.2))
+                idxs = np.random.choice(type_dict[t], min(int(len(type_dict[t]) * 0.2), len(type_dict[t])))
             elif self.split == 'valid':
                 idxs = type_dict[max(-5, -len(type_dict[t])):]
             src_items = mask_list(trg_items, idxs)
@@ -68,13 +69,14 @@ class Dataset(torch.utils.data.Dataset):
 
             src_data.append(torch.tensor(src_items, dtype=torch.long))
             trg_data.append(torch.tensor(trg_items, dtype=torch.long))
-            type_data.append(torch.tensor(types, dtype=torch.long))
+            # type_data.append(torch.tensor(types, dtype=torch.long))
 
         src_items = torch.vstack(src_data)
         trg_items = torch.vstack(trg_data)
-        types = torch.vstack(type_data)
+        # types = torch.vstack(type_data)
 
-        return src_items, trg_items, types
+        # return src_items, trg_items, types
+        return src_items, trg_items
 
 
 def train(
