@@ -67,61 +67,67 @@ class Recommender(pl.LightningModule):
         return self.linear_out(src)
 
     def training_step(self, batch, batch_idx):
-        src_items, y_true, _type = batch
+        total_loss = 0
+        for i in range(3):
+            src_items, y_true, _type = batch[i]
+            y_pred = self(src_items, _type)
 
-        y_pred = self(src_items, _type)
+            y_pred = y_pred.view(-1, y_pred.size(2))
+            y_true = y_true.view(-1)
 
-        y_pred = y_pred.view(-1, y_pred.size(2))
-        y_true = y_true.view(-1)
+            src_items = src_items.view(-1)
+            mask = src_items == self.mask
 
-        src_items = src_items.view(-1)
-        mask = src_items == self.mask
+            loss = masked_ce(y_pred=y_pred, y_true=y_true, mask=mask)
+            accuracy = masked_accuracy(y_pred=y_pred, y_true=y_true, mask=mask)
 
-        loss = masked_ce(y_pred=y_pred, y_true=y_true, mask=mask)
-        accuracy = masked_accuracy(y_pred=y_pred, y_true=y_true, mask=mask)
+            self.log('valid_loss', loss)
+            self.log('valid_accuracy', accuracy)
+            total_loss += loss
 
-        self.log('train_loss', loss)
-        self.log('train_accuracy', accuracy)
-
-        return loss
+        return total_loss / 3
 
     def validation_step(self, batch, batch_idx):
-        src_items, y_true, _type = batch
+        total_loss = 0
+        for i in range(3):
+            src_items, y_true, _type = batch[i]
+            y_pred = self(src_items, _type)
 
-        y_pred = self(src_items, _type)
+            y_pred = y_pred.view(-1, y_pred.size(2))
+            y_true = y_true.view(-1)
 
-        y_pred = y_pred.view(-1, y_pred.size(2))
-        y_true = y_true.view(-1)
+            src_items = src_items.view(-1)
+            mask = src_items == self.mask
 
-        src_items = src_items.view(-1)
-        mask = src_items == self.mask
+            loss = masked_ce(y_pred=y_pred, y_true=y_true, mask=mask)
+            accuracy = masked_accuracy(y_pred=y_pred, y_true=y_true, mask=mask)
 
-        loss = masked_ce(y_pred=y_pred, y_true=y_true, mask=mask)
-        accuracy = masked_accuracy(y_pred=y_pred, y_true=y_true, mask=mask)
+            self.log('valid_loss', loss)
+            self.log('valid_accuracy', accuracy)
+            total_loss += loss
 
-        self.log('valid_loss', loss)
-        self.log('valid_accuracy', accuracy)
-
-        return loss
+        return total_loss / 3
 
     def test_step(self, batch, batch_idx):
-        src_items, y_true, _type = batch
+        total_loss = 0
+        for i in range(3):
+            src_items, y_true, _type = batch[i]
+            y_pred = self(src_items, _type)
 
-        y_pred = self(src_items, _type)
+            y_pred = y_pred.view(-1, y_pred.size(2))
+            y_true = y_true.view(-1)
 
-        y_pred = y_pred.view(-1, y_pred.size(2))
-        y_true = y_true.view(-1)
+            src_items = src_items.view(-1)
+            mask = src_items == self.mask
 
-        src_items = src_items.view(-1)
-        mask = src_items == self.mask
+            loss = masked_ce(y_pred=y_pred, y_true=y_true, mask=mask)
+            accuracy = masked_accuracy(y_pred=y_pred, y_true=y_true, mask=mask)
 
-        loss = masked_ce(y_pred=y_pred, y_true=y_true, mask=mask)
-        accuracy = masked_accuracy(y_pred=y_pred, y_true=y_true, mask=mask)
+            self.log('valid_loss', loss)
+            self.log('valid_accuracy', accuracy)
+            total_loss += loss
 
-        self.log('test_loss', loss)
-        self.log('test_accuracy', accuracy)
-
-        return loss
+        return total_loss / 3
 
     def predict_step(self, batch, batch_idx):
         src_items, _, _type = batch

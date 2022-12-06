@@ -3,6 +3,7 @@ import os
 import argparse
 import random
 
+import numpy as np
 import pandas as pd
 import pytorch_lightning as pl
 import torch
@@ -14,12 +15,14 @@ from model1 import Recommender
 from data_processing1 import get_context, pad_list, map_column, map_type, MASK
 
 
-def mask_list(l1, p=0.8):
-    return [a if random.random() < p else MASK for a in l1]
+def mask_list(l1, indexes):
+    for idx in indexes:
+        l1[idx] = MASK
+    return l1
 
 
-def mask_last_elements_list(l1, val_context_size=5):
-    return l1[:-val_context_size] + mask_list(l1[-val_context_size:], p=0.5)
+# def mask_last_elements_list(l1, val_context_size=5):
+#     return l1[:-val_context_size] + mask_list(l1[-val_context_size:], p=0.5)
 
 
 class Dataset(torch.utils.data.Dataset):
@@ -41,24 +44,34 @@ class Dataset(torch.utils.data.Dataset):
         # interaction
         trg_items = context['aid_mapped'].tolist()
         types = context['type_enc'].tolist()
+        type_dict = {2: [], 3: [], 4: []}
+        for i in range(len(types)):
+            type_dict[types[i]].append(i)
 
-        if self.split == 'train':
-            src_items = mask_list(trg_items)
-        elif self.split == 'valid':
-            src_items = mask_last_elements_list(trg_items)
+        src_data, trg_data, type_data = [], [], []
+        for t in (2, 3, 4):
+            if self.split == 'train':
+                idxs = np.random.choice(type_dict[t], int(len(type_dict[t]) * 0.2))
+            elif self.split == 'valid':
+                idxs = type_dict[max(-5, -len(type_dict[t])):]
+            src_items = mask_list(trg_items, idxs)
 
-        if self.split != 'test':
-            pad_mode = 'left' if random.random() < 0.5 else 'right'
-            trg_items = pad_list(trg_items, history_size=self.history_size, mode=pad_mode)
-            src_items = pad_list(src_items, history_size=self.history_size, mode=pad_mode)
-            types = pad_list(types, history_size=self.history_size, mode=pad_mode)
-        else:
-            src_items = pad_list(src_items, history_size=self.history_size, mode='left')
-            types = pad_list(types, history_size=self.history_size, mode='left')
+            if self.split != 'test':
+                pad_mode = 'left' if random.random() < 0.5 else 'right'
+                trg_items = pad_list(trg_items, history_size=self.history_size, mode=pad_mode)
+                src_items = pad_list(src_items, history_size=self.history_size, mode=pad_mode)
+                types = pad_list(types, history_size=self.history_size, mode=pad_mode)
+            else:
+                src_items = pad_list(src_items, history_size=self.history_size, mode='left')
+                types = pad_list(types, history_size=self.history_size, mode='left')
 
-        src_items = torch.tensor(src_items, dtype=torch.long)
-        trg_items = torch.tensor(trg_items, dtype=torch.long)
-        types = torch.tensor(types, dtype=torch.long)
+            src_data.append(torch.tensor(src_items, dtype=torch.long))
+            trg_data.append(torch.tensor(trg_items, dtype=torch.long))
+            type_data.append(torch.tensor(types, dtype=torch.long))
+
+        src_items = torch.vstack(src_data)
+        trg_items = torch.vstack(trg_data)
+        types = torch.vstack(type_data)
 
         return src_items, trg_items, types
 
