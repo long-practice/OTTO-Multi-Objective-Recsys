@@ -68,14 +68,18 @@ class Recommender(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         total_loss = 0
+        total_src, total_y_true, total_type = batch
         for i in range(3):
-            src_items, y_true, _type = batch[i]
+            src_items = total_src[:, i, :]
+            y_true = total_y_true[:, i, :]
+            _type = total_type[:, i, :]
+
             y_pred = self(src_items, _type)
 
             y_pred = y_pred.view(-1, y_pred.size(2))
-            y_true = y_true.view(-1)
+            y_true = y_true.view.contiguous().view(-1)
 
-            src_items = src_items.view(-1)
+            src_items = src_items.contiguous().view(-1)
             mask = src_items == self.mask
 
             loss = masked_ce(y_pred=y_pred, y_true=y_true, mask=mask)
@@ -89,14 +93,18 @@ class Recommender(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         total_loss = 0
+        total_src, total_y_true, total_type = batch
         for i in range(3):
-            src_items, y_true, _type = batch[i]
+            src_items = total_src[:, i, :]
+            y_true = total_y_true[:, i, :]
+            _type = total_type[:, i, :]
+
             y_pred = self(src_items, _type)
 
             y_pred = y_pred.view(-1, y_pred.size(2))
-            y_true = y_true.view(-1)
+            y_true = y_true.view.contiguous().view(-1)
 
-            src_items = src_items.view(-1)
+            src_items = src_items.contiguous().view(-1)
             mask = src_items == self.mask
 
             loss = masked_ce(y_pred=y_pred, y_true=y_true, mask=mask)
@@ -105,19 +113,21 @@ class Recommender(pl.LightningModule):
             self.log('valid_loss', loss)
             self.log('valid_accuracy', accuracy)
             total_loss += loss
-
-        return total_loss / 3
 
     def test_step(self, batch, batch_idx):
         total_loss = 0
+        total_src, total_y_true, total_type = batch
         for i in range(3):
-            src_items, y_true, _type = batch[i]
+            src_items = total_src[:, i, :]
+            y_true = total_y_true[:, i, :]
+            _type = total_type[:, i, :]
+
             y_pred = self(src_items, _type)
 
             y_pred = y_pred.view(-1, y_pred.size(2))
-            y_true = y_true.view(-1)
+            y_true = y_true.view.contiguous().view(-1)
 
-            src_items = src_items.view(-1)
+            src_items = src_items.contiguous().view(-1)
             mask = src_items == self.mask
 
             loss = masked_ce(y_pred=y_pred, y_true=y_true, mask=mask)
@@ -126,8 +136,6 @@ class Recommender(pl.LightningModule):
             self.log('valid_loss', loss)
             self.log('valid_accuracy', accuracy)
             total_loss += loss
-
-        return total_loss / 3
 
     def predict_step(self, batch, batch_idx):
         src_items, _, _type = batch

@@ -50,6 +50,7 @@ class Dataset(torch.utils.data.Dataset):
 
         src_data, trg_data, type_data = [], [], []
         for t in (2, 3, 4):
+            idxs = []
             if self.split == 'train':
                 idxs = np.random.choice(type_dict[t], int(len(type_dict[t]) * 0.2))
             elif self.split == 'valid':
@@ -80,7 +81,7 @@ def train(
         data_csv_path,
         log_dir='recommender_logs',
         model_dir='recommender_models',
-        batch_size=16,
+        batch_size=8,
         epochs=2000,
         history_size=120
 ):
