@@ -42,13 +42,17 @@ class Dataset(torch.utils.data.Dataset):
 
         if self.split == 'train':
             src_items = mask_list(trg_items)
-        else:
+        elif self.split == 'valid':
             src_items = mask_last_elements_list(trg_items)
 
-        pad_mode = 'left' if random.random() < 0.5 else 'right'
-        trg_items = pad_list(trg_items, history_size=self.history_size, mode=pad_mode)
-        src_items = pad_list(src_items, history_size=self.history_size, mode=pad_mode)
-        types = pad_list(types, history_size=self.history_size, mode=pad_mode)
+        if self.split != 'test':
+            pad_mode = 'left' if random.random() < 0.5 else 'right'
+            trg_items = pad_list(trg_items, history_size=self.history_size, mode=pad_mode)
+            src_items = pad_list(src_items, history_size=self.history_size, mode=pad_mode)
+            types = pad_list(types, history_size=self.history_size, mode=pad_mode)
+        else:
+            src_items = pad_list(src_items, history_size=self.history_size, mode='left')
+            types = pad_list(types, history_size=self.history_size, mode='left')
 
         src_items = torch.tensor(src_items, dtype=torch.long)
         trg_items = torch.tensor(trg_items, dtype=torch.long)
@@ -61,7 +65,7 @@ def train(
         data_csv_path,
         log_dir='recommender_logs',
         model_dir='recommender_models',
-        batch_size=32,
+        batch_size=16,
         epochs=2000,
         history_size=120
 ):

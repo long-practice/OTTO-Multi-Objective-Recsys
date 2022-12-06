@@ -123,6 +123,11 @@ class Recommender(pl.LightningModule):
 
         return loss
 
+    def predict_step(self, batch, batch_idx):
+        src_items, _, _type = batch
+        src_items[torch.isnan(src_items)] = self.mask
+        return self(src_items, _type)
+
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=10, factor=0.1)
