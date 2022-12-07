@@ -69,6 +69,7 @@ class Recommender(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         total_loss = 0
         total_src, total_y_true = batch
+        loss_weight = [0.1, 0.3, 0.6]
         # src_items, y_true = batch
         for _type in range(3):
             src_items = total_src[:, _type, :]
@@ -87,13 +88,14 @@ class Recommender(pl.LightningModule):
 
             self.log('valid_loss', loss)
             self.log('valid_accuracy', accuracy)
-            total_loss += loss
+            total_loss += loss * loss_weight[_type]
 
-        return total_loss / 3
+        return total_loss
 
     def validation_step(self, batch, batch_idx):
         total_loss = 0
         total_src, total_y_true = batch
+        loss_weight = [0.1, 0.3, 0.6]
         # src_items, y_true = batch
         for _type in range(3):
             src_items = total_src[:, _type, :]
@@ -112,13 +114,14 @@ class Recommender(pl.LightningModule):
 
             self.log('valid_loss', loss)
             self.log('valid_accuracy', accuracy)
-            total_loss += loss
+            total_loss += loss * loss_weight[_type]
 
-        return total_loss / 3
+        return total_loss
 
     def test_step(self, batch, batch_idx):
         total_loss = 0
         total_src, total_y_true = batch
+        loss_weight = [0.1, 0.3, 0.6]
         # src_items, y_true = batch
         for _type in range(3):
             src_items = total_src[:, _type, :]
@@ -137,15 +140,16 @@ class Recommender(pl.LightningModule):
 
             self.log('valid_loss', loss)
             self.log('valid_accuracy', accuracy)
-            total_loss += loss
+            total_loss += loss * loss_weight[_type]
 
-        return total_loss / 3
+        return total_loss
 
     def predict_step(self, batch, batch_idx):
-        src_items, _ = batch
+        src_items = batch
         res = []
         for _type in range(3):
-            res.append(self(src_items, _type))
+            reco = self(src_items[_type].unsqueeze(0), _type)
+            res.append(reco)
         return res
 
     def configure_optimizers(self):
