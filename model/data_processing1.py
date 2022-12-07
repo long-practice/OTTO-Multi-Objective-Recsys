@@ -11,7 +11,6 @@ def map_column(df, col_name):
     mapping = {k: i + 2 for i, k in enumerate(values)}
     inverse_mapping = {v: k for k, v in mapping.items()}
     df[col_name + '_mapped'] = df[col_name].map(mapping)
-    df.drop(df.isnan)
 
     return df, mapping, inverse_mapping
 
