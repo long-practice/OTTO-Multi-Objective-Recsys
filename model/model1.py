@@ -142,9 +142,11 @@ class Recommender(pl.LightningModule):
         return total_loss / 3
 
     def predict_step(self, batch, batch_idx):
-        src_items, _, _type = batch
-        src_items[torch.isnan(src_items)] = self.mask
-        return self(src_items, _type)
+        src_items, _ = batch
+        res = []
+        for _type in range(3):
+            res.append(self(src_items, _type))
+        return res
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)

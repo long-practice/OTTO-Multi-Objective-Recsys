@@ -12,7 +12,7 @@ from pytorch_lightning.loggers import TensorBoardLogger
 from torch.utils.data import DataLoader
 
 from model1 import Recommender
-from data_processing1 import get_context, pad_list, map_column, map_type, MASK
+from data_processing1 import get_context, pad_list, map_column, map_type, MASK, PAD
 
 
 def mask_list(l1, indexes):
@@ -58,14 +58,9 @@ class Dataset(torch.utils.data.Dataset):
                 idxs = type_dict[max(-5, -len(type_dict[t])):]
             src_items = mask_list(trg_items, idxs)
 
-            if self.split != 'test':
-                pad_mode = 'left' if random.random() < 0.5 else 'right'
-                trg_items = pad_list(trg_items, history_size=self.history_size, mode=pad_mode)
-                src_items = pad_list(src_items, history_size=self.history_size, mode=pad_mode)
-                types = pad_list(types, history_size=self.history_size, mode=pad_mode)
-            else:
-                src_items = pad_list(src_items, history_size=self.history_size, mode='left')
-                types = pad_list(types, history_size=self.history_size, mode='left')
+            pad_mode = 'left' if random.random() < 0.5 else 'right'
+            trg_items = pad_list(trg_items, history_size=self.history_size, mode=pad_mode)
+            src_items = pad_list(src_items, history_size=self.history_size, mode=pad_mode)
 
             src_data.append(torch.tensor(src_items, dtype=torch.long))
             trg_data.append(torch.tensor(trg_items, dtype=torch.long))
@@ -92,6 +87,7 @@ def train(
     data.sort_values(by='ts', inplace=True)
 
     data, aid_mapping, inv_aid_mapping = map_column(data, 'aid')
+    data.loc[data.isnull(), 'aid_mapped'] = PAD
     data, type_mapping, inv_type_mapping = map_type(data)
 
     grp_by_train = data.groupby(by='session')
