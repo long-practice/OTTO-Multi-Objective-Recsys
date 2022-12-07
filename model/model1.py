@@ -53,7 +53,7 @@ class Recommender(pl.LightningModule):
         pos_encoder = (torch.arange(0, in_sequence_len, device=src_items.device).unsqueeze(0).repeat(batch_size, 1))
         pos_encoder = self.input_pos_embedding(pos_encoder)
 
-        type_encoder = self.input_type_embedding(_type)
+        type_encoder = self.input_type_embedding(torch.tensor([_type], device=src_items.device))
 
         src_items += pos_encoder
         src_items += type_encoder
@@ -68,13 +68,16 @@ class Recommender(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         total_loss = 0
-        # total_src, total_y_true, total_type = batch
-        src_items, y_true = batch
+        total_src, total_y_true = batch
+        # src_items, y_true = batch
         for _type in range(3):
+            src_items = total_src[:, _type, :]
+            y_true = total_y_true[:, _type, :]
+
             y_pred = self(src_items, _type)
 
             y_pred = y_pred.view(-1, y_pred.size(2))
-            y_true = y_true.view.contiguous().view(-1)
+            y_true = y_true.contiguous().view(-1)
 
             src_items = src_items.contiguous().view(-1)
             mask = src_items == self.mask
@@ -90,13 +93,16 @@ class Recommender(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         total_loss = 0
-        # total_src, total_y_true, total_type = batch
-        src_items, y_true = batch
+        total_src, total_y_true = batch
+        # src_items, y_true = batch
         for _type in range(3):
+            src_items = total_src[:, _type, :]
+            y_true = total_y_true[:, _type, :]
+
             y_pred = self(src_items, _type)
 
             y_pred = y_pred.view(-1, y_pred.size(2))
-            y_true = y_true.view.contiguous().view(-1)
+            y_true = y_true.contiguous().view(-1)
 
             src_items = src_items.contiguous().view(-1)
             mask = src_items == self.mask
@@ -112,13 +118,16 @@ class Recommender(pl.LightningModule):
 
     def test_step(self, batch, batch_idx):
         total_loss = 0
-        # total_src, total_y_true, total_type = batch
-        src_items, y_true = batch
+        total_src, total_y_true = batch
+        # src_items, y_true = batch
         for _type in range(3):
+            src_items = total_src[:, _type, :]
+            y_true = total_y_true[:, _type, :]
+
             y_pred = self(src_items, _type)
 
             y_pred = y_pred.view(-1, y_pred.size(2))
-            y_true = y_true.view.contiguous().view(-1)
+            y_true = y_true.contiguous().view(-1)
 
             src_items = src_items.contiguous().view(-1)
             mask = src_items == self.mask
@@ -133,9 +142,11 @@ class Recommender(pl.LightningModule):
         return total_loss / 3
 
     def predict_step(self, batch, batch_idx):
-        src_items, _, _type = batch
-        src_items[torch.isnan(src_items)] = self.mask
-        return self(src_items, _type)
+        src_items, _ = batch
+        res = []
+        for _type in range(3):
+            res.append(self(src_items, _type))
+        return res
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
