@@ -52,18 +52,19 @@ class Dataset(torch.utils.data.Dataset):
         src_data, trg_data = [], []
         for t in (2, 3, 4):
             idxs = []
-            if self.split == 'train':
-                idxs = np.random.choice(type_dict[t], min(int(len(type_dict[t]) * 0.2), len(type_dict[t])))
-            elif self.split == 'valid':
-                idxs = type_dict[max(-5, -len(type_dict[t])):]
-            src_items = mask_list(trg_items, idxs)
+            if type_dict[t]:
+                if self.split == 'train':
+                    idxs = np.random.choice(type_dict[t], min(int(len(type_dict[t]) * 0.2), len(type_dict[t])))
+                elif self.split == 'valid':
+                    idxs = type_dict[max(-5, -len(type_dict[t])):]
+            src_items = mask_list(trg_items[:], idxs)
 
             pad_mode = 'left' if random.random() < 0.5 else 'right'
-            trg_items = pad_list(trg_items, history_size=self.history_size, mode=pad_mode)
-            src_items = pad_list(src_items, history_size=self.history_size, mode=pad_mode)
+            trg_ls = pad_list(trg_items, history_size=self.history_size, mode=pad_mode)
+            src_ls = pad_list(src_items, history_size=self.history_size, mode=pad_mode)
 
-            src_data.append(torch.tensor(src_items, dtype=torch.long))
-            trg_data.append(torch.tensor(trg_items, dtype=torch.long))
+            src_data.append(torch.tensor(src_ls, dtype=torch.long))
+            trg_data.append(torch.tensor(trg_ls, dtype=torch.long))
             # type_data.append(torch.tensor(types, dtype=torch.long))
 
         src_items = torch.vstack(src_data)
@@ -87,7 +88,7 @@ def train(
     data.sort_values(by='ts', inplace=True)
 
     data, aid_mapping, inv_aid_mapping = map_column(data, 'aid')
-    data.loc[data.isnull(), 'aid_mapped'] = PAD
+    data[data.isnull()]['aid_mapped'] = PAD
     data, type_mapping, inv_type_mapping = map_type(data)
 
     grp_by_train = data.groupby(by='session')
