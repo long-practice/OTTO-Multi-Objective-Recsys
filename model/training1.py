@@ -56,7 +56,7 @@ class Dataset(torch.utils.data.Dataset):
                 if self.split == 'train':
                     idxs = np.random.choice(type_dict[t], min(int(len(type_dict[t]) * 0.2), len(type_dict[t])))
                 elif self.split == 'valid':
-                    idxs = type_dict[max(-5, -len(type_dict[t])):]
+                    idxs = type_dict[t][max(-5, -len(type_dict[t])):]
             src_items = mask_list(trg_items[:], idxs)
 
             pad_mode = 'left' if random.random() < 0.5 else 'right'
@@ -95,7 +95,7 @@ def train(
     groups = list(grp_by_train.groups)
 
     train_data = Dataset(groups=groups, grp_by=grp_by_train, split='train', history_size=history_size)
-    val_data = Dataset(groups=groups, grp_by=grp_by_train, split='val', history_size=history_size)
+    val_data = Dataset(groups=groups, grp_by=grp_by_train, split='valid', history_size=history_size)
 
     print('len(train_data)', len(train_data))
     print('len(val_data)', len(val_data))
