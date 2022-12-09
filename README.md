@@ -10,6 +10,7 @@
 
 초기모델 구성: 22.12.05.(월) [PR3](https://github.com/long-practice/OTTO-Multi-Objective-Recsys/pull/3)<br>
 Multi-type 모델 구성: 22.12.07.(수) [PR10](https://github.com/long-practice/OTTO-Multi-Objective-Recsys/pull/10)<br>
+모델 오류 수정: 22.12.07.(수) ~
 
 <br><br>
 
