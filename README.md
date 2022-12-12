@@ -10,7 +10,8 @@
 
 초기모델 구성: 22.12.05.(월) [PR3](https://github.com/long-practice/OTTO-Multi-Objective-Recsys/pull/3)<br>
 Multi-type 모델 구성: 22.12.07.(수) [PR10](https://github.com/long-practice/OTTO-Multi-Objective-Recsys/pull/10)<br>
-모델 오류 수정: 22.12.07.(수) ~
+모델 오류 수정: 22.12.07.(수)
+축소된 형태의 모델 학습 시도: 22.12.13.(월) `batch_size` 확장, `history_size` 축소
 
 <br><br>
 
