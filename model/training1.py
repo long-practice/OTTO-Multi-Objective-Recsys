@@ -79,9 +79,9 @@ def train(
         data_csv_path,
         log_dir='recommender_logs',
         model_dir='recommender_models',
-        batch_size=8,
+        batch_size=32,
         epochs=2000,
-        history_size=120
+        history_size=30
 ):
     data = pd.read_csv(data_csv_path)
 

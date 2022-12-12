@@ -90,7 +90,7 @@ class Recommender(pl.LightningModule):
             self.log('valid_accuracy', accuracy)
             total_loss += loss * loss_weight[_type]
 
-        return total_loss
+        return {'loss': total_loss}
 
     def validation_step(self, batch, batch_idx):
         total_loss = 0
@@ -116,7 +116,7 @@ class Recommender(pl.LightningModule):
             self.log('valid_accuracy', accuracy)
             total_loss += loss * loss_weight[_type]
 
-        return total_loss
+        return {'loss': total_loss}
 
     def test_step(self, batch, batch_idx):
         total_loss = 0
@@ -142,7 +142,7 @@ class Recommender(pl.LightningModule):
             self.log('valid_accuracy', accuracy)
             total_loss += loss * loss_weight[_type]
 
-        return total_loss
+        return {'test_loss': total_loss}
 
     def predict_step(self, batch, batch_idx):
         src_items = batch

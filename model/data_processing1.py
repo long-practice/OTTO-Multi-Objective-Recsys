@@ -25,7 +25,7 @@ def map_type(df):
     return df, mapping, inverse_mapping
 
 
-def get_context(df, split, context_size=120, val_context_size=5):
+def get_context(df, split, context_size=30, val_context_size=5):
     if split == 'train':
         m, M = min(10, df.shape[0] - val_context_size), max(10, df.shape[0] - val_context_size)
         end_index = random.randint(m, M)
