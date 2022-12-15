@@ -11,7 +11,7 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.loggers import TensorBoardLogger
 from torch.utils.data import DataLoader
 
-from model1 import Recommender
+from model2 import Recommender
 from data_processing1 import get_context, pad_list, map_column, map_type, MASK, PAD
 
 
