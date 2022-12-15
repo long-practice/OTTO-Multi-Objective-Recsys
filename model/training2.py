@@ -15,7 +15,7 @@ from model2 import Recommender
 from data_processing1 import get_context, pad_list, map_column, map_type, MASK, PAD
 
 
-def mask_list(l1, indexes):
+def mask_list(l1, p=0.8):
     l1 = [a if random.random() < p else MASK for a in l1]
     return l1
 
